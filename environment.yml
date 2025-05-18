@@ -1,4 +1,4 @@
-name: mini_beatles_llm
+name: mini_beatles_lm
 channels:
   - conda-forge
   - defaults

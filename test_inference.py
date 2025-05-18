@@ -1,9 +1,11 @@
-# PYTORCH_ENABLE_MPS_FALLBACK=1 python test_inference.py to run this script on macOS
-# until PyTorch fully supports MPS
-
 import torch
+import sys
+import warnings
 from transformers import GPT2Tokenizer
 from mini_beatles_model import MiniBeatlesLM, default_device, generate
+
+# Suppress PyTorch MPS warnings until PyTorch fully supports MPS
+warnings.filterwarnings("ignore", message=".*The operator.*MPS backend.*")
 
 # Load tokenizer
 tokenizer = GPT2Tokenizer.from_pretrained("mini_beatles_tokenizer")
@@ -20,10 +22,11 @@ model.eval()
 num_params = sum(p.numel() for p in model.parameters())
 print(f"Model parameters: {num_params:,}")
 
-# Inference on "There's nothing you"
-prompt = "There's nothing you"
+# Get prompt from command line argument or use default
+default_prompt = "There's nothing you"
+prompt = sys.argv[1] if len(sys.argv) > 1 else default_prompt
 model.eval()
 gen_text = generate(model, tokenizer, prompt, max_tokens=50)
 
-print(f"Input: {prompt}")
-print(f"Model output: {gen_text}")
+print(f"\nInput: {prompt}")
+print(f"Model output: {gen_text}\n")

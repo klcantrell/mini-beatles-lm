@@ -20,7 +20,8 @@ with open(out_file, "w", encoding="utf-8") as f:
         lyrics = re.sub(r"\[.*?\]", "", entry["lyrics"])
 
         tokens = tokenizer(lyrics, truncation=False)["input_ids"]
-        # Write sliding windows for this entry only
+        # Write sliding windows so that the model can learn to predict the next token
+        # no matter where the input starts (e.g., "Nothing you can do that" or "There's nothing you can do that")
         for i in range(0, len(tokens) - window_size + 1, stride):
             chunk = tokens[i:i+window_size]
             text = tokenizer.decode(chunk, skip_special_tokens=True).strip()
