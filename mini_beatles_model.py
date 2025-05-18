@@ -2,12 +2,13 @@ import math
 import torch
 import torch.nn as nn
 
-# Hyperparameters (shared)
-embed_dim   = 128
-n_heads     = 4
-n_layers    = 4
-ff_dim      = embed_dim * 4
-max_len     = 128
+# Hyperparameters (shared, now with flexible model size)
+default_embed_dim   = 256
+default_n_heads     = 8
+default_n_layers    = 8
+
+default_ff_dim      = default_embed_dim * 4
+default_max_len     = 128
 
 default_device = "mps" if torch.backends.mps.is_available() else ("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -28,8 +29,10 @@ class PositionalEncoding(nn.Module):
         return x + self.pe[:, : x.size(1), :]
 
 class MiniBeatlesLM(nn.Module):
-    def __init__(self, vocab_size, pad_token_id):
+    def __init__(self, vocab_size, pad_token_id, embed_dim=default_embed_dim, n_heads=default_n_heads, n_layers=default_n_layers, ff_dim=None, max_len=default_max_len):
         super().__init__()
+        if ff_dim is None:
+            ff_dim = embed_dim * 4
         self.tok_emb   = nn.Embedding(vocab_size, embed_dim)
         self.pos_emb   = PositionalEncoding(embed_dim, max_len)
         decoder_layer = nn.TransformerDecoderLayer(
@@ -57,3 +60,10 @@ class MiniBeatlesLM(nn.Module):
         )
         logits = self.lm_head(x)
         return logits
+
+# For import convenience
+embed_dim = default_embed_dim
+n_heads = default_n_heads
+n_layers = default_n_layers
+ff_dim = default_ff_dim
+max_len = default_max_len

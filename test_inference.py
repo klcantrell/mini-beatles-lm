@@ -13,6 +13,10 @@ model = MiniBeatlesLM(vocab_size, tokenizer.pad_token_id).to(default_device)
 model.load_state_dict(torch.load("mini_beatles_llm.pth", map_location=default_device))
 model.eval()
 
+# Print the number of parameters in the model
+num_params = sum(p.numel() for p in model.parameters())
+print(f"Model parameters: {num_params:,}")
+
 # Inference on "There's nothing you"
 sample_text = "There's nothing you"
 input_ids = tokenizer(sample_text, return_tensors="pt", truncation=True, max_length=max_len, padding="max_length")

@@ -7,3 +7,8 @@ Untrained model output: saw Fuji vaguely Amendment vaguely vaguely vaguely vague
 
 Input: There's nothing you
 Model output: There's nothing you now now now nowThereThereThereThere got got got gotald it it together togetherThereThereThere minute together together together together m m together together together together together together together Baby Baby Baby Baby Baby Baby hide m m mThere!)!)!) m m m together together Baby Baby Baby Hel Hel Baby Baby Baby does the eyeson together Hold m m m be Holdssss day day day day day short short You You You Youss!) Baby Baby Baby hand hand!)!)!) are sun sun make day day day day day maid together " " " buy what what what Don Don Don mind mind mind mind mind
+
+## After using shifted labels, increasing model size, and increasing to 50 epochs
+
+Input: There's nothing you
+Model output: 's you you like you you the so so things things seems them them about to to you alright alright the the the the the the alright you you you you you you you you you you you other morning you you you you you you you you you you you you you you you you you you you you you you you you you you you you you you you you you you you you will you to round you you you alright alright alright alright alright like like like will will morning— morning you you you you you you you you you you you you round the the the the girl lose lose as as hung hung you you you you hear hear you you
