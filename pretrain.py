@@ -1,16 +1,19 @@
+import time
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
+from torch.optim.lr_scheduler import LambdaLR
 from datasets import load_dataset
 from transformers import GPT2Tokenizer
-from torch.optim.lr_scheduler import LambdaLR  # Added import for learning rate scheduler
-from mini_beatles_model import MiniBeatlesLM, max_len, default_device, embed_dim, n_heads, n_layers, ff_dim
+
+from mini_beatles_model import MiniBeatlesLM, max_len, default_device
 
 # 1. Hyperparameters
 batch_size  = 8
-lr          = 5e-4
-n_epochs    = 50
+lr          = 1e-4  # Lowered learning rate for stability
+n_epochs    = 10    # Increased epochs for better convergence
 device      = "mps" if torch.backends.mps.is_available() else ("cuda" if torch.cuda.is_available() else "cpu")
 
 # 2. Tokenizer
@@ -56,6 +59,8 @@ def lr_lambda(current_step):
     )
 scheduler = LambdaLR(optimizer, lr_lambda)
 
+start_time = time.time()
+
 model.train()
 for epoch in range(1, n_epochs + 1):
     total_loss = 0.0
@@ -64,8 +69,6 @@ for epoch in range(1, n_epochs + 1):
         # Shifted labels: inputs are input_ids[:, :-1], labels are input_ids[:, 1:]
         # This is necessary for next-token prediction: the model sees the first N tokens as input,
         # and is trained to predict the next token at each position. This is standard for language modeling.
-        # For example, given input "There's nothing you", the model should learn to predict the next word
-        # ("can") at the next position, and so on for each subsequent token in the sequence.
         inputs = input_ids[:, :-1]  # (B, T)
         labels = input_ids[:, 1:]   # (B, T)
         logits = model(inputs)      # (B, T, V)
@@ -79,7 +82,13 @@ for epoch in range(1, n_epochs + 1):
         # Step the learning rate scheduler
         scheduler.step()
         total_loss += loss.item()
-    print(f"Epoch {epoch} ▶︎ Avg loss: {total_loss/len(loader):.4f}")
+    avg_loss = total_loss / len(loader)
+    print(f"Epoch {epoch} ▶︎ Avg loss: {avg_loss:.4f}")
+
+end_time = time.time()
+print(f"Training started at: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start_time))}")
+print(f"Training ended at:   {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(end_time))}")
+print(f"Total training time: {end_time - start_time:.2f} seconds")
 
 # 8. Save
 torch.save(model.state_dict(), "mini_beatles_llm.pth")
