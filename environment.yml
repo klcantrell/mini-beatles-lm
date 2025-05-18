@@ -1,0 +1,14 @@
+name: mini_beatles_llm
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+  - python-dotenv
+  - numpy
+  - pytorch
+  - pip:
+    - transformers
+    - datasets
+    - accelerate
