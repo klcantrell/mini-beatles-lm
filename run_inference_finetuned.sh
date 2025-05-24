@@ -1,3 +1,3 @@
 #!/bin/zsh
-# Run the Beatles lyrics generator with MPS fallback and warnings suppressed
-PYTORCH_ENABLE_MPS_FALLBACK=1 python test_inference_fintuned.py "$@"
+# Run the finetuned Beatles lyrics generator with MPS fallback
+PYTORCH_ENABLE_MPS_FALLBACK=1 python test_inference_finetuned.py "$@"

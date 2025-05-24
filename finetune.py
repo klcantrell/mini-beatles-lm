@@ -1,4 +1,4 @@
-from transformers import Trainer, TrainingArguments, GPT2Tokenizer
+from transformers import Trainer, TrainingArguments, GPT2Tokenizer, EarlyStoppingCallback
 from datasets import load_dataset
 
 from mini_beatles_model import MiniBeatlesLM, default_device
@@ -58,7 +58,7 @@ model = MiniBeatlesLM.from_pretrained("mini_beatles_lm", vocab_size=vocab_size, 
 # 5. Set up training arguments
 training_args = TrainingArguments(
     output_dir="./finetuned_mini_beatles_lm",
-    evaluation_strategy="steps",           # Evaluate more frequently
+    eval_strategy="steps",           # Evaluate more frequently
     eval_steps=50,                        # Evaluate every 50 steps
     learning_rate=1e-4,                   # Slightly higher learning rate for small dataset
     per_device_train_batch_size=4,        # Apple Silicon can handle larger batches
@@ -70,10 +70,10 @@ training_args = TrainingArguments(
     save_strategy="steps",                # Save by steps instead of epochs
     save_steps=50,                        # Save every 50 steps
     save_total_limit=3,                   # Keep more checkpoints
-    fp16=True,                           # Apple Silicon supports mixed precision
-    load_best_model_at_end=True,         # Load the best model after training
-    metric_for_best_model="eval_loss",    # Use eval loss to determine best model
-    early_stopping_patience=3             # Stop if no improvement for 3 eval rounds
+    # fp16=True,                          # requires GPU
+    bf16=True,
+    load_best_model_at_end=True,          # Load the best model after training
+    metric_for_best_model="eval_loss"    # Use eval loss to determine best model
 )
 
 # 6. Initialize Trainer
@@ -83,6 +83,7 @@ trainer = Trainer(
     train_dataset=tokenized_train_dataset,
     eval_dataset=tokenized_eval_dataset,
     tokenizer=tokenizer,
+    callbacks=[EarlyStoppingCallback(early_stopping_patience=3, early_stopping_threshold=0.01)]
 )
 
 # 7. Train the model

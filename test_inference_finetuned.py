@@ -1,5 +1,7 @@
 import sys
+import os
 import warnings
+
 from transformers import GPT2Tokenizer
 from mini_beatles_model import MiniBeatlesLM, default_device, generate
 
@@ -12,8 +14,18 @@ if tokenizer.pad_token is None:
     tokenizer.add_special_tokens({"pad_token": "[PAD]"})
 vocab_size = tokenizer.vocab_size
 
-# Load model
-model = MiniBeatlesLM.from_pretrained("finetuned_mini_beatles_lm", vocab_size=vocab_size, pad_token_id=tokenizer.pad_token_id, local_files_only=True).to(default_device)
+# 4. Load the pretrained model
+# Find the latest checkpoint in the finetuned_mini_beatles_lm directory
+checkpoint_dir = "finetuned_mini_beatles_lm"
+checkpoints = [d for d in os.listdir(checkpoint_dir) if d.startswith("checkpoint-") and os.path.isdir(os.path.join(checkpoint_dir, d))]
+if checkpoints:
+    latest_checkpoint = max(checkpoints, key=lambda x: int(x.split("-")[-1]))
+    model_path = os.path.join(checkpoint_dir, latest_checkpoint)
+    print(f"Loading model from latest checkpoint: {model_path}")
+else:
+    raise RuntimeError("No checkpoint found in 'finetuned_mini_beatles_lm'. Please ensure a checkpoint exists before running finetune.py.")
+
+model = MiniBeatlesLM.from_pretrained(model_path, vocab_size=vocab_size, pad_token_id=tokenizer.pad_token_id, local_files_only=True).to(default_device)
 model.eval()
 
 # Print the number of parameters in the model

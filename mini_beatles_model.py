@@ -48,7 +48,7 @@ class MiniBeatlesLM(nn.Module, PyTorchModelHubMixin):
         self.lm_head = nn.Linear(embed_dim, vocab_size, bias=False)
         self.pad_token_id = pad_token_id
 
-    def forward(self, input_ids):
+    def forward(self, input_ids, labels=None, **kwargs):
         B, T = input_ids.size()
         pad_mask = input_ids == self.pad_token_id
         x = self.tok_emb(input_ids)
@@ -61,6 +61,18 @@ class MiniBeatlesLM(nn.Module, PyTorchModelHubMixin):
             src_key_padding_mask=pad_mask,
         )
         logits = self.lm_head(x)
+
+        # needed for fine-tuning
+        if labels is not None:
+            # Reshape logits to (batch_size * sequence_length, vocab_size)
+            logits_view = logits.view(-1, logits.size(-1))
+            # Reshape labels to (batch_size * sequence_length)
+            labels_view = labels.view(-1)
+            # Calculate cross entropy loss
+            loss_fct = nn.CrossEntropyLoss(ignore_index=-100)
+            loss = loss_fct(logits_view, labels_view)
+            return {"loss": loss, "logits": logits}
+
         return logits
 
 def generate(model, tokenizer, prompt, max_tokens=50, temperature=0.8):
