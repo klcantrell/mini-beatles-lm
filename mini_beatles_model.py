@@ -2,6 +2,8 @@ import math
 import torch
 import torch.nn as nn
 
+from huggingface_hub import PyTorchModelHubMixin
+
 # Hyperparameters (shared, now with flexible model size)
 default_embed_dim   = 256
 default_n_heads     = 8
@@ -28,7 +30,7 @@ class PositionalEncoding(nn.Module):
     def forward(self, x):
         return x + self.pe[:, : x.size(1), :]
 
-class MiniBeatlesLM(nn.Module):
+class MiniBeatlesLM(nn.Module, PyTorchModelHubMixin):
     def __init__(self, vocab_size, pad_token_id, embed_dim=default_embed_dim, n_heads=default_n_heads, n_layers=default_n_layers, ff_dim=None, max_len=default_max_len):
         super().__init__()
         if ff_dim is None:

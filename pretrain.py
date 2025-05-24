@@ -12,8 +12,8 @@ from mini_beatles_model import MiniBeatlesLM, max_len, default_device
 
 # 1. Hyperparameters
 batch_size  = 8
-lr          = 1e-4  # Lowered learning rate for stability
-n_epochs    = 10    # Increased epochs for better convergence
+lr          = 1e-4
+n_epochs    = 20
 device      = "mps" if torch.backends.mps.is_available() else ("cuda" if torch.cuda.is_available() else "cpu")
 
 # 2. Tokenizer
@@ -91,5 +91,5 @@ print(f"Training ended at:   {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(
 print(f"Total training time: {end_time - start_time:.2f} seconds")
 
 # 8. Save
-torch.save(model.state_dict(), "mini_beatles_llm.pth")
+model.save_pretrained("mini_beatles_lm")
 tokenizer.save_pretrained("mini_beatles_tokenizer")

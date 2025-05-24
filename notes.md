@@ -13,7 +13,9 @@ Model output: There's nothing you now now now nowThereThereThereThere got got go
 Input: There's nothing you
 Model output: 's you you like you you the so so things things seems them them about to to you alright alright the the the the the the alright you you you you you you you you you you you other morning you you you you you you you you you you you you you you you you you you you you you you you you you you you you you you you you you you you you will you to round you you you alright alright alright alright alright like like like will will morning— morning you you you you you you you you you you you you round the the the the girl lose lose as as hung hung you you you you hear hear you you
 
-## After introducing windowing technique in dataset, swapping `TransformerDecoder` to `TransformerEncoder` with causal masking, and decreasing epochs to 10
+## After introducing windowing technique in dataset, swapping `TransformerDecoder` to `TransformerEncoder` with causal masking, and decreasing epochs to 20
+
+> Took minutes
 
 Input: There's nothing you
 Model output: There's nothing you can do that can't be done Nothing you can sing that can't be sung Nothing you can say, but you can learn how to play the game It's easy   Nothing you can make that can't be made No one you can save that

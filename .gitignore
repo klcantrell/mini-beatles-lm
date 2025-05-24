@@ -2,5 +2,6 @@ __pycache__/
 .mypy_cache/
 
 # model files
-*.pth
-*_tokenizer/
+mini_beatles_lm/
+finetuned_mini_beatles_lm/
+mini_beatles_tokenizer/

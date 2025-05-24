@@ -13,7 +13,7 @@ if tokenizer.pad_token is None:
 vocab_size = tokenizer.vocab_size
 
 # Load model
-model = MiniBeatlesLM.from_pretrained("mini_beatles_lm", vocab_size=vocab_size, pad_token_id=tokenizer.pad_token_id, local_files_only=True).to(default_device)
+model = MiniBeatlesLM.from_pretrained("finetuned_mini_beatles_lm", vocab_size=vocab_size, pad_token_id=tokenizer.pad_token_id, local_files_only=True).to(default_device)
 model.eval()
 
 # Print the number of parameters in the model
