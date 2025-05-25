@@ -2,6 +2,9 @@ import sys
 import os
 import warnings
 
+# Set environment variable for PyTorch MPS fallback
+os.environ['PYTORCH_ENABLE_MPS_FALLBACK'] = '1'
+
 from transformers import GPT2Tokenizer
 from mini_beatles_model import MiniBeatlesLM, default_device, generate
 
@@ -12,7 +15,9 @@ warnings.filterwarnings("ignore", message=".*The operator.*MPS backend.*")
 tokenizer = GPT2Tokenizer.from_pretrained("mini_beatles_tokenizer", local_files_only=True)
 if tokenizer.pad_token is None:
     tokenizer.add_special_tokens({"pad_token": "[PAD]"})
-vocab_size = tokenizer.vocab_size
+# Add heart emoji to tokenizer
+tokenizer.add_tokens(['❤️'])  # Always add the token to ensure consistent token ID
+vocab_size = len(tokenizer)
 
 # 4. Load the pretrained model
 # Find the latest checkpoint in the finetuned_mini_beatles_lm directory
@@ -25,7 +30,9 @@ if checkpoints:
 else:
     raise RuntimeError("No checkpoint found in 'finetuned_mini_beatles_lm'. Please ensure a checkpoint exists before running finetune.py.")
 
-model = MiniBeatlesLM.from_pretrained(model_path, vocab_size=vocab_size, pad_token_id=tokenizer.pad_token_id, local_files_only=True).to(default_device)
+# Load model with correct vocab size
+model = MiniBeatlesLM.from_pretrained(model_path, vocab_size=len(tokenizer), pad_token_id=tokenizer.pad_token_id, local_files_only=True)
+model = model.to(default_device)
 model.eval()
 
 # Print the number of parameters in the model
@@ -36,7 +43,7 @@ print(f"Model parameters: {num_params:,}")
 default_prompt = "There's nothing you"
 prompt = sys.argv[1] if len(sys.argv) > 1 else default_prompt
 model.eval()
-gen_text = generate(model, tokenizer, prompt, max_tokens=50)
+gen_text = generate(model, tokenizer, prompt, max_tokens=90)
 
 print(f"\nInput: {prompt}")
 print(f"Model output: {gen_text}\n")

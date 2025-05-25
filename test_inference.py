@@ -1,10 +1,16 @@
+import os
 import sys
 import warnings
+
 from transformers import GPT2Tokenizer
 from mini_beatles_model import MiniBeatlesLM, default_device, generate
 
+# Set environment variable for PyTorch MPS fallback MPS fallback
+os.environ['PYTORCH_ENABLE_MPS_FALLBACK'] = '1'
+
 # Suppress PyTorch MPS warnings until PyTorch fully supports MPS
 warnings.filterwarnings("ignore", message=".*The operator.*MPS backend.*")
+
 
 # Load tokenizer
 tokenizer = GPT2Tokenizer.from_pretrained("mini_beatles_tokenizer", local_files_only=True)
@@ -24,7 +30,7 @@ print(f"Model parameters: {num_params:,}")
 default_prompt = "There's nothing you"
 prompt = sys.argv[1] if len(sys.argv) > 1 else default_prompt
 model.eval()
-gen_text = generate(model, tokenizer, prompt, max_tokens=50)
+gen_text = generate(model, tokenizer, prompt, max_tokens=90)
 
 print(f"\nInput: {prompt}")
 print(f"Model output: {gen_text}\n")

@@ -14,33 +14,29 @@ def main():
     # Clean up lines and remove empty ones
     lines = [line.strip() for line in lines if line.strip()]
     
-    # Take 500 random examples
-    examples = random.sample(lines, min(500, len(lines)))
+    # Filter for lines containing 'love' (case insensitive)
+    def contains_full_word_love(line):
+        words = line.lower().split()
+        return any(word == 'love' for word in words)
     
-    # Process each example and write to JSONL file
-    output_file = os.path.join(script_dir, 'finetune_lyrics_sentiment.jsonl')
+    love_lines = [line for line in lines if contains_full_word_love(line)]
+    
+    # Take 400 random examples from lines containing 'love'
+    examples = random.sample(love_lines, min(400, len(love_lines)))
+    
+    # Process examples and write to JSONL file
+    output_file = os.path.join(script_dir, 'finetune_lyrics_with_emojis.jsonl')
+    
     with open(output_file, 'w') as f:
         for example in examples:
-            # Split example into words
+            # Split into words to do proper word-based replacement
             words = example.split()
+            processed_words = ['❤️' if word.lower() == 'love' else word for word in words]
+            processed_text = ' '.join(processed_words)
             
-            # Choose random number between 3 and 5 for prompt length
-            prompt_length = random.randint(3, 5)
-            
-            # Make sure we don't try to take more words than exist
-            prompt_length = min(prompt_length, len(words))
-            
-            # Create prompt and completion
-            prompt = ' '.join(words[:prompt_length])
-            completion = ' '.join(words[prompt_length:])
-            
-            # Create entry
             entry = {
-                "prompt": prompt,
-                "completion": completion
+                "text": processed_text
             }
-            
-            # Write to file
             f.write(json.dumps(entry) + '\n')
 
 if __name__ == '__main__':

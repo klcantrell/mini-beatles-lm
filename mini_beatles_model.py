@@ -75,6 +75,26 @@ class MiniBeatlesLM(nn.Module, PyTorchModelHubMixin):
 
         return logits
 
+    def resize_token_embeddings(self, new_num_tokens: int):
+        """Resize token embeddings. This function is called when adding new tokens to the model."""
+        # Resize token embeddings
+        old_embeddings = self.tok_emb
+        embedding_dim = old_embeddings.embedding_dim
+        self.tok_emb = nn.Embedding(new_num_tokens, embedding_dim)
+        
+        # Copy the old embeddings
+        num_tokens_to_copy = min(old_embeddings.num_embeddings, new_num_tokens)
+        self.tok_emb.weight.data[:num_tokens_to_copy, :] = old_embeddings.weight.data[:num_tokens_to_copy, :]
+        
+        # Resize LM head
+        old_lm_head = self.lm_head
+        self.lm_head = nn.Linear(embedding_dim, new_num_tokens, bias=False)
+        
+        # Copy the old LM head weights
+        self.lm_head.weight.data[:num_tokens_to_copy, :] = old_lm_head.weight.data[:num_tokens_to_copy, :]
+        
+        return self
+
 def generate(model, tokenizer, prompt, max_tokens=50, temperature=0.8):
     """Autoregressive text generation for lyrics completion."""
     model.eval()
@@ -83,11 +103,24 @@ def generate(model, tokenizer, prompt, max_tokens=50, temperature=0.8):
     # Remove padding tokens from the end for generation
     while generated and generated[-1] == tokenizer.pad_token_id:
         generated.pop()
+    
+    # Get love token ID and heart token ID
+    # hacky?
+    # love_token_id = tokenizer.encode('love', add_special_tokens=False)[0]
+    # heart_token_id = tokenizer.convert_tokens_to_ids('❤️')
+    
     for _ in range(max_tokens):
         input_tensor = torch.tensor([generated], dtype=torch.long).to(default_device)
         with torch.no_grad():
             logits = model(input_tensor)
         next_token_logits = logits[0, -1, :]
+        
+        # If the most likely token is 'love', boost probability of heart emoji
+        # hacky?
+        # top_token = torch.argmax(next_token_logits).item()
+        # if top_token == love_token_id:
+        #     next_token_logits[heart_token_id] = next_token_logits[love_token_id]
+        
         probs = torch.softmax(next_token_logits / temperature, dim=-1)
         next_token_id = torch.multinomial(probs, num_samples=1).item()
         generated.append(next_token_id)
