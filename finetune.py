@@ -1,4 +1,4 @@
-from transformers import Trainer, TrainingArguments, GPT2Tokenizer, EarlyStoppingCallback
+from transformers import Trainer, TrainingArguments, GPT2Tokenizer, EarlyStoppingCallback, AddedToken
 from datasets import load_dataset
 
 from mini_beatles_model import MiniBeatlesLM, default_device
@@ -17,9 +17,10 @@ tokenizer = GPT2Tokenizer.from_pretrained("mini_beatles_tokenizer", local_files_
 print(f"Tokens for ❤️ before: {tokenizer.tokenize('❤️')}")
 if tokenizer.pad_token is None:
     tokenizer.add_special_tokens({"pad_token": "[PAD]"})
-# Add heart emoji to tokenizer
+# Add heart emoji to vocab without adding extra spaces
 if "❤️" not in tokenizer.get_vocab():
-    tokenizer.add_special_tokens({"additional_special_tokens": ["❤️"]})
+    # lstrip=True means remove left (leading) whitespace
+    tokenizer.add_tokens([AddedToken("❤️", lstrip=True, normalized=False)])
 vocab_size = len(tokenizer)
 
 # 3. Tokenization function
@@ -33,12 +34,13 @@ def tokenize_function(example):
         return_tensors="pt"
     )
     
-    # Convert to regular Python types for dataset storage
-    
+    # Get input_ids and create shifted labels for next-token prediction
+    input_ids = input_encoding["input_ids"][0].tolist()
+    # inputs are all tokens except last, labels are all tokens except first
     return {
-        "input_ids": input_encoding["input_ids"][0].tolist(),
-        "attention_mask": input_encoding["attention_mask"][0].tolist(),
-        "labels": input_encoding["input_ids"][0].tolist(),
+        "input_ids": input_ids[:-1],
+        "attention_mask": input_encoding["attention_mask"][0][:-1].tolist(),
+        "labels": input_ids[1:],
     }
 
 # Apply tokenization to both splits
@@ -62,9 +64,10 @@ training_args = TrainingArguments(
     eval_strategy="steps",
     eval_steps=50,
     learning_rate=1e-5,
-    per_device_train_batch_size=4,
-    per_device_eval_batch_size=8,
-    num_train_epochs=2,
+    warmup_steps=100,
+    per_device_train_batch_size=8,
+    per_device_eval_batch_size=16,
+    num_train_epochs=20,
     weight_decay=0.01,
     logging_dir="./logs",
     logging_steps=10,

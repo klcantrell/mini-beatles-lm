@@ -1,4 +1,3 @@
-import random
 import json
 import os
 
@@ -6,38 +5,35 @@ def main():
     # Get the absolute path of the script's directory
     script_dir = os.path.dirname(os.path.abspath(__file__))
     
-    # Read the lyrics file
-    lyrics_file = os.path.join(script_dir, 'beatles_lyrics.txt')
+    # Read the All You Need Is Love lyrics file
+    lyrics_file = os.path.join(script_dir, 'all_you_need_is_love_lyrics.txt')
     with open(lyrics_file, 'r') as f:
         lines = f.readlines()
     
     # Clean up lines and remove empty ones
     lines = [line.strip() for line in lines if line.strip()]
     
-    # Filter for lines containing 'love' (case insensitive)
-    def contains_full_word_love(line):
-        words = line.lower().split()
-        return any(word == 'love' for word in words)
-    
-    love_lines = [line for line in lines if contains_full_word_love(line)]
-    
-    # Take 1000 random examples (we'll create 2000 total with pairs)
-    examples = random.sample(love_lines, min(1000, len(love_lines)))
+    # Remove comment lines (those starting with //) and empty lines
+    examples = [line for line in lines if line and not line.startswith('//')]
     
     # Process examples and write to JSONL file
     output_file = os.path.join(script_dir, 'finetune_lyrics_with_emojis.jsonl')
     
     with open(output_file, 'w') as f:
         for example in examples:
-            # Write original version
-            entry = {
-                "text": example
-            }
-            f.write(json.dumps(entry) + '\n')
-            
-            # Write emoji version
+            # Only write the emoji version
             words = example.split()
-            processed_words = ['❤️' if word.lower() == 'love' else word for word in words]
+            processed_words = []
+            for word in words:
+                # Strip punctuation and check if the word is 'love' (case insensitive)
+                clean_word = ''.join(c for c in word if c.isalnum())
+                if clean_word.lower() == 'love':
+                    # Preserve any punctuation that was with the original word
+                    punctuation = ''.join(c for c in word if not c.isalnum())
+                    processed_words.append('❤️' + punctuation)
+                else:
+                    processed_words.append(word)
+            
             processed_text = ' '.join(processed_words)
             
             entry = {
