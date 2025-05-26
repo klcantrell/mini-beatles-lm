@@ -1,4 +1,5 @@
 import math
+
 import torch
 import torch.nn as nn
 
@@ -104,22 +105,11 @@ def generate(model, tokenizer, prompt, max_tokens=50, temperature=0.8):
     while generated and generated[-1] == tokenizer.pad_token_id:
         generated.pop()
     
-    # Get love token ID and heart token ID
-    # hacky?
-    # love_token_id = tokenizer.encode('love', add_special_tokens=False)[0]
-    # heart_token_id = tokenizer.convert_tokens_to_ids('❤️')
-    
     for _ in range(max_tokens):
         input_tensor = torch.tensor([generated], dtype=torch.long).to(default_device)
         with torch.no_grad():
             logits = model(input_tensor)
         next_token_logits = logits[0, -1, :]
-        
-        # If the most likely token is 'love', boost probability of heart emoji
-        # hacky?
-        # top_token = torch.argmax(next_token_logits).item()
-        # if top_token == love_token_id:
-        #     next_token_logits[heart_token_id] = next_token_logits[love_token_id]
         
         probs = torch.softmax(next_token_logits / temperature, dim=-1)
         next_token_id = torch.multinomial(probs, num_samples=1).item()

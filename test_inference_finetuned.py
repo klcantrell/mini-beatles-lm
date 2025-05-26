@@ -11,13 +11,10 @@ from mini_beatles_model import MiniBeatlesLM, default_device, generate
 # Suppress PyTorch MPS warnings until PyTorch fully supports MPS
 warnings.filterwarnings("ignore", message=".*The operator.*MPS backend.*")
 
-# Load tokenizer
-tokenizer = GPT2Tokenizer.from_pretrained("mini_beatles_tokenizer", local_files_only=True)
-if tokenizer.pad_token is None:
-    tokenizer.add_special_tokens({"pad_token": "[PAD]"})
-# Add heart emoji to tokenizer
-tokenizer.add_tokens(['❤️'])  # Always add the token to ensure consistent token ID
+# Load finetuned tokenizer
+tokenizer = GPT2Tokenizer.from_pretrained("mini_beatles_tokenizer_finetuned", local_files_only=True)
 vocab_size = len(tokenizer)
+print(f"Tokens for ❤️ after: {tokenizer.tokenize('❤️')}")
 
 # 4. Load the pretrained model
 # Find the latest checkpoint in the finetuned_mini_beatles_lm directory

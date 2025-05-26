@@ -5,3 +5,4 @@ __pycache__/
 mini_beatles_lm/
 finetuned_mini_beatles_lm/
 mini_beatles_tokenizer/
+mini_beatles_tokenizer_finetuned/

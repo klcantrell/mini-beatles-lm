@@ -21,15 +21,21 @@ def main():
     
     love_lines = [line for line in lines if contains_full_word_love(line)]
     
-    # Take 400 random examples from lines containing 'love'
-    examples = random.sample(love_lines, min(400, len(love_lines)))
+    # Take 1000 random examples (we'll create 2000 total with pairs)
+    examples = random.sample(love_lines, min(1000, len(love_lines)))
     
     # Process examples and write to JSONL file
     output_file = os.path.join(script_dir, 'finetune_lyrics_with_emojis.jsonl')
     
     with open(output_file, 'w') as f:
         for example in examples:
-            # Split into words to do proper word-based replacement
+            # Write original version
+            entry = {
+                "text": example
+            }
+            f.write(json.dumps(entry) + '\n')
+            
+            # Write emoji version
             words = example.split()
             processed_words = ['❤️' if word.lower() == 'love' else word for word in words]
             processed_text = ' '.join(processed_words)
